@@ -2,11 +2,12 @@ from kafka import KafkaConsumer
 import json
 import time
 import datetime
-
+from redispython import redispersistence
 
 def initialiseConsumer():
 	consumer = KafkaConsumer(bootstrap_servers='localhost:9092',
-				value_deserializer= lambda x: json.loads(x.decode('utf-8')),auto_offset_reset='earliest')
+				value_deserializer= lambda x: json.loads(x.decode('utf-8')),
+				auto_offset_reset='earliest')
 	consumer.subscribe(['bitcoinTopic'])
 	processMessages(consumer)
 
@@ -21,20 +22,23 @@ def processMessages(consumer):
 		currentMinute = timeNow.minute
 		currentHour = timeNow.hour
 		
-		print(currentSecond) # for Debugging
-		
+		# 1st API
+		transactionJSON = json.loads(transactionJSON)
+
 		if(currentSecond == 0):
-			printMessageCount(currentHour,currentMinute,count) #save this in redis
+			#2nd API
+			saveMessageCount(currentHour,currentMinute,count)
 			count = 0
 		
-		transactionJSON = json.dumps(message.value,indent=4,sort_keys=True) # save this in redis
-		transactionJSON = json.loads(transactionJSON)
-		aggregateValue = processTransaction(transactionJSON)
+		# 3rd API
 		transactionHash = transactionJSON['x']['hash']
-		print(transactionHash+"="+str(aggregateValue)) # save in redis
+		aggregateValue = processTransaction(transactionJSON)
+		
 
-def printMessageCount(currentHour,currentMinute,count):
-	print(str(currentHour)+":"+str(currentMinute)+"="+str(count))
+
+def saveMessageCount(currentHour,currentMinute,count):
+	redispersistence.saveMinuteCountDetails(currentHour,currentMinute,count)
+
 
 def processTransaction(transactionJSON):
 	print(transactionJSON['x']['out'])
