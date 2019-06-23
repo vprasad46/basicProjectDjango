@@ -19,6 +19,8 @@ from bitcoinstream import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('show_transactions/', views.show_transactions)
-    path('transactions_count_per_minute',views.transactions_count_per_minute)
+    path('show_transactions/', views.show_transactions),
+    path('transactions_count_per_minute/',views.transactions_count_per_minute),
+    path('transactions_count_per_minute/<int:min_transaction>',views.transactions_count_per_minute),
+    path('high_value_addr/',views.high_value_addr)
 ]
