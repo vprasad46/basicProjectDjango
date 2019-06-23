@@ -2,7 +2,7 @@ from kafka import KafkaConsumer
 import json
 import time
 import datetime
-from redispython import redispersistence
+from bitcoinstream.redispython import redispersistence
 
 def initialiseConsumer():
 	consumer = KafkaConsumer(bootstrap_servers='localhost:9092',
@@ -23,25 +23,22 @@ def processMessages(consumer):
 		currentHour = timeNow.hour
 		
 		# 1st API
-		transactionJSON = json.loads(transactionJSON)
+		transactionJSON = json.loads(json.dumps(message.value))
+		redispersistence.saveTransactionJSON(transactionJSON)
 
 		if(currentSecond == 0):
 			#2nd API
-			saveMessageCount(currentHour,currentMinute,count)
+			redispersistence.saveMinuteCountDetails(currentHour,currentMinute,count)
 			count = 0
 		
 		# 3rd API
 		transactionHash = transactionJSON['x']['hash']
 		aggregateValue = processTransaction(transactionJSON)
+
+		redispersistence.saveTransactionAggregate(transactionHash,aggregateValue)
 		
 
-
-def saveMessageCount(currentHour,currentMinute,count):
-	redispersistence.saveMinuteCountDetails(currentHour,currentMinute,count)
-
-
 def processTransaction(transactionJSON):
-	print(transactionJSON['x']['out'])
 	transactionOut = transactionJSON['x']['out']
 	aggregateValue = getAggTransactionValue(transactionOut)
 	return aggregateValue
@@ -55,5 +52,3 @@ def getAggTransactionValue(transactionOut):
 	return aggValue
 
 
-if __name__ == '__main__':
-	initialiseConsumer()

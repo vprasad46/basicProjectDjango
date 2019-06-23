@@ -13,7 +13,3 @@ def startKafkaProducer():
 		result = ws.recv()
 		result = json.loads(result)
 		producer.send('bitcoinTopic', value=result)
-
-
-if __name__ == '__main__':
-	startKafkaProducer();

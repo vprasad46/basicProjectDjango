@@ -15,8 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from bitcoinstream import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('bitcoinstream/',include('bitcoinstream.urls'))
+    path('show_transactions/', views.show_transactions)
+    path('transactions_count_per_minute',views.transactions_count_per_minute)
 ]
