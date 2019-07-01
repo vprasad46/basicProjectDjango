@@ -42,6 +42,7 @@ def transactions_count_per_minute(request,min_transaction=-1):
 
 	for x in range(0,currentMinute):
 		countKey = str(currentHour)+":"+str(0+x)
+		transactionCount = redisConnection.get(countKey)
 		if transactionCount != None:
 			if min_transaction == -1 or int(transactionCount) >= min_transaction: 
 				result = result + countKey+"="+str(transactionCount)+"\n"
